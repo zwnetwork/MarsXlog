@@ -15,23 +15,29 @@ object PPLog {
         }
     }
 
-    fun init(path: String, isDebug: Boolean = true) {
+    /**
+     * 初始化xlog 默认缓存七天
+     */
+    fun init(path: String, isDebug: Boolean = true, config: Xlog.XLogConfig? = null) {
         kotlin.runCatching {
-            val logConfig = Xlog.XLogConfig()
-            logConfig.mode = Xlog.AppednerModeAsync
-            logConfig.logdir = path
-            logConfig.pubkey = ""
-            logConfig.compressmode = Xlog.ZLIB_MODE
-            logConfig.compresslevel = 0
-            logConfig.cachedir = ""
-            logConfig.cachedays = 3
-            Log.setLogImp(Xlog())
-            if (isDebug) {
-                logConfig.level = Xlog.LEVEL_DEBUG
-                Log.setConsoleLogOpen(true)
-            } else {
-                logConfig.level = Xlog.LEVEL_INFO
-                Log.setConsoleLogOpen(false)
+            var logConfig = config
+            if (logConfig == null) {
+                logConfig = Xlog.XLogConfig()
+                logConfig.mode = Xlog.AppednerModeAsync
+                logConfig.logdir = path
+                logConfig.pubkey = ""
+                logConfig.compressmode = Xlog.ZLIB_MODE
+                logConfig.compresslevel = 0
+                logConfig.cachedir = ""
+                logConfig.cachedays = 7
+                Log.setLogImp(Xlog())
+                if (isDebug) {
+                    logConfig.level = Xlog.LEVEL_DEBUG
+                    Log.setConsoleLogOpen(true)
+                } else {
+                    logConfig.level = Xlog.LEVEL_INFO
+                    Log.setConsoleLogOpen(false)
+                }
             }
             Xlog.open(
                 false,
@@ -44,6 +50,7 @@ object PPLog {
             )
         }
     }
+
 
     //=====================================================================================
     // v
@@ -135,7 +142,7 @@ object PPLog {
         }
     }
 
-    //关闭日志，不再写入
+    //关闭日志，不再写入程序退出时关闭日志：
     fun close() {
         runCommonCatch {
             Log.appenderClose()
