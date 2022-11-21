@@ -1,5 +1,6 @@
 package com.common.loglib
 
+import com.common.loglib.vo.LogConfig
 import com.tencent.mars.xlog.Log
 import com.tencent.mars.xlog.Xlog
 
@@ -18,10 +19,10 @@ object PPLog {
     /**
      * 初始化xlog 默认缓存七天
      */
-    fun init(path: String, isDebug: Boolean = true, config: Xlog.XLogConfig? = null) {
+    fun init(path: String, isDebug: Boolean = true, config: LogConfig? = null) {
         kotlin.runCatching {
-            var logConfig = config
-            if (logConfig == null) {
+            val logConfig: Xlog.XLogConfig
+            if (config == null) {
                 logConfig = Xlog.XLogConfig()
                 logConfig.mode = Xlog.AppednerModeAsync
                 logConfig.logdir = path
@@ -30,14 +31,23 @@ object PPLog {
                 logConfig.compresslevel = 0
                 logConfig.cachedir = ""
                 logConfig.cachedays = 7
-                Log.setLogImp(Xlog())
-                if (isDebug) {
-                    logConfig.level = Xlog.LEVEL_DEBUG
-                    Log.setConsoleLogOpen(true)
-                } else {
-                    logConfig.level = Xlog.LEVEL_INFO
-                    Log.setConsoleLogOpen(false)
-                }
+            } else {
+                logConfig = Xlog.XLogConfig()
+                logConfig.mode = config.mode
+                logConfig.logdir = path
+                logConfig.pubkey = config.pubkey
+                logConfig.compressmode = config.compressmode
+                logConfig.compresslevel = config.compresslevel
+                logConfig.cachedir = config.cachedir
+                logConfig.cachedays = config.cachedays
+            }
+            Log.setLogImp(Xlog())
+            if (isDebug) {
+                logConfig.level = Xlog.LEVEL_DEBUG
+                Log.setConsoleLogOpen(true)
+            } else {
+                logConfig.level = Xlog.LEVEL_INFO
+                Log.setConsoleLogOpen(false)
             }
             Xlog.open(
                 false,
