@@ -1,3 +1,4 @@
 include ':app'
 rootProject.name = "XlogMars"
 include ':logLib'
+include ':BaseLibrary'
